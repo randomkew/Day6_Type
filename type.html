@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>type</title>
+    <link rel="stylesheet" href="type.css">
+</head>
+<body>
+    <form class="search-form">
+        <input type="text" class="search" placeholder="City or State">
+        <ul class="suggestions">
+            
+            <li>Filter for a city</li>
+            <li>or a state</li>
+        </ul>
+    </form>
+    <script>
+        const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+        const cities=[];//빈배열 생성
+        //자바스크립트 사용해서 서버에서 네트워크 요청보내고 정보를 받아옴 endpoint가 서버역할느낌
+        fetch(endpoint)
+        .then(bolb=>bolb.json())
+        .then(data => cities.push(...data));
+
+        function findMatches(wordToMatch,cities) {
+            return cities.filter(place => {
+                const regex = new RegExp(wordToMatch, 'gi');//RegExp는 검색할떄 패턴을 설정해주는거 gi는 전체에서 대소문자를 구분하지 않겠다는 뜻
+                return place.city.match(regex) || place.state.match(regex)
+            });    
+        }
+
+
+function displayMatches() {
+  const matchArray = findMatches(this.value, cities);
+  const html = matchArray.map(place => {
+    const regex = new RegExp(this.value, 'gi');
+    const cityName = place.city.replace(regex, `<span class="hl">${this.value}</span>`);
+    const stateName = place.state.replace(regex, `<span class="hl">${this.value}</span>`);
+    return `
+      <li>
+        <span class="name">${cityName}, ${stateName}</span>
+        <span class="population">${numberWithCommas(place.population)}</span>
+      </li>
+    `;
+  }).join('');
+  suggestions.innerHTML=html;
+}
+
+const searchInput = document.querySelector('.search');
+const suggestions = document.querySelector('.suggestions');
+
+searchInput.addEventListener('change', displayMatches);
+searchInput.addEventListener('keyup', displayMatches);
+
+</script>
+</body>
+</html>
